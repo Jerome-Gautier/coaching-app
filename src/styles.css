@@ -1,0 +1,53 @@
+:root {
+    --bg: #f5f7fb;
+    --surface: #ffffff;
+    --line: #d0d7e2;
+    --text: #2d2f36;
+    --muted: #5f6c7b;
+    --primary: #4da6ff;
+    --primary-2: #52e0c8;
+    --ok: #1e9b50;
+    --err: #d64545;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+ul, ol {
+    list-style: none;
+}
+
+button,
+input[type="button"],
+input[type="submit"],
+input[type="reset"] {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+.primary-btn {
+    background: linear-gradient(90deg, var(--primary), var(--primary-2));
+    color: #fff;
+    border: none;
+    padding: 14px;
+    border-radius: 12px;
+    font-weight: 700;
+    width: 100%;
+    font-size: 16px;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.22), 0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+    transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+    border-radius: 14px;
+}
