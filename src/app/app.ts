@@ -1,21 +1,28 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, OnInit, OnDestroy, computed, Signal } from '@angular/core';
+import { AuthService } from './services/auth.service';
 import { Homepage } from './components/homepage/homepage';
 import { Navbar } from "./components/navbar/navbar";
 import { Suivi } from "./components/suivi/suivi";
 import { Parametres } from "./components/parametres/parametres";
+import { Login } from "./components/login/login";
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-root',
-  imports: [Homepage, Navbar, Suivi, Parametres],
+  imports: [Homepage, Navbar, Suivi, Parametres, Login],
   template: `
     <div class="app-container">
       <div class="main-container">
-        @if (section === 'accueil') {
+        @if (!isLoggedIn()) {
+          <app-login />
+        } @else {
+          @if (section === 'accueil') {
           <app-homepage />
-        } @else if (section === 'suivi') {
-          <app-suivi />
-        } @else if (section === 'parametres') {
-          <app-parametres />
+          } @else if (section === 'suivi') {
+            <app-suivi />
+          } @else if (section === 'parametres') {
+            <app-parametres />
+          }
         }
       </div>
 
@@ -49,4 +56,16 @@ import { Parametres } from "./components/parametres/parametres";
 export class App {
   protected readonly title = signal('Coaching App');
   section: string = 'accueil';
+
+  username!: Signal<any | null>;
+  isLoggedIn!: Signal<boolean>;
+
+  constructor(private auth: AuthService) {
+    this.username = toSignal(this.auth.username$);
+    this.isLoggedIn = computed(() => !!this.username());
+  }
+
+  ngOnInit() {
+    this.auth.loadFromStorage();
+  }
 }
