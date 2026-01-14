@@ -67,6 +67,12 @@ import { Router } from '@angular/router';
       .login-card .primary-btn {
         margin-top: 8px;
       }
+      .login-card .error {
+        margin-top: 4px;
+        color: var(--err);
+        font-size: 14px;
+        font-weight: 600;
+      }
       @media (max-width: 420px) {
         .login-card {
           padding: 18px;

@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
-const userList = ["testuser"];
+import { UserModel, userList } from './data';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -18,21 +18,18 @@ export class AuthService {
     if (storedUser) {
       this.userSubject.next(JSON.parse(storedUser));
     }
-    console.log('Loaded user from storage:', this.userSubject.value);
   }
 
   login(username: string, password?: string) {
-    console.log('Attempting login for user:', username);
-    const exists = userList.includes(username);
-    console.log('User exists:', exists);
+    const exists = Object.prototype.hasOwnProperty.call(userList, username);
 
     if (exists) {
-      const user = { username };
-      localStorage.setItem('auth_user', JSON.stringify(user));
-      this.userSubject.next(user);
+      const userData: UserModel = userList[username as keyof typeof userList];
+      localStorage.setItem('auth_user', JSON.stringify(userData));
+      this.userSubject.next(userData);
       return { success: true, message: 'Login successful' };
     } else {
-        return { success: false, message: 'Utilisateur non trouvé.'};
+      return { success: false, message: 'Utilisateur non trouvé.' };
     }
   }
 
