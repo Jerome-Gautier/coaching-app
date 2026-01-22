@@ -1,5 +1,6 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { ReturnBtn } from "../../return-button/return-btn";
+import { loadProfileData } from '../../../../utils/utils';
 
 @Component({
   selector: 'app-suivi-profile',
@@ -10,28 +11,28 @@ import { ReturnBtn } from "../../return-button/return-btn";
   <div class="main-container">
     <h2>Mon profil</h2>
     <div class="username-container">
-      <h3>{{ username }}</h3>
+      <h3>Username</h3>
     </div>
 
     <div class="profile-grid">
       <div class="profile-item full">
         <div class="profile-label">Début du coaching</div>
-        <div class="profile-value">16/10/2020</div>
+        <div class="profile-value">{{ data().startDate }}</div>
       </div>
 
       <div class="profile-item">
         <div class="profile-label">Semaine</div>
-        <div class="profile-value">3</div>
+        <div class="profile-value">{{ data().week }}</div>
       </div>
 
       <div class="profile-item">
         <div class="profile-label">Phase</div>
-        <div class="profile-value">Priming</div>
+        <div class="profile-value">{{ data().phase }}</div>
       </div>
 
       <div class="profile-item full">
         <div class="profile-label">Score santé</div>
-        <div class="profile-value">5</div>
+        <div class="profile-value">{{ data().healthScore }}</div>
       </div>
     </div>
 
@@ -141,7 +142,12 @@ import { ReturnBtn } from "../../return-button/return-btn";
 export class Profile {
   @Input() section: string = '';
   @Output() sectionChange: EventEmitter<string> = new EventEmitter<string>();
-  username: string = "Utilisateur";
+  data = signal<any>({ name: '—', startDate: '—', week: '—', phase: '—', age: '—', healthScore: 0 });
+
+  async ngOnInit() {
+    const response = await loadProfileData();
+    console.log('Profile data loaded:', response);
+  }
 
   setSection(newSection: string) {
     this.section = newSection;

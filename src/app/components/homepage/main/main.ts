@@ -19,7 +19,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
             </div>
           </div>
           <div class="recap-date">
-            <p>{{ todayDate }}</p>
+            <p>{{ yesterdayDate }}</p>
           </div>
         </div>
 
@@ -29,7 +29,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
               <span class="recap-icon">😴</span>
               <p>sommeil</p>
             </div>
-            <p class="recap-value">{{ sleepLength }}</p>
+            <p class="recap-value">{{ data.sleep }}</p>
           </div>
 
           <div class="recap-grid-item">
@@ -37,7 +37,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
               <span class="recap-icon">⚖️</span>
               <p>poids</p>
             </div>
-            <p class="recap-value">{{ weight }}</p>
+            <p class="recap-value">{{ data.weight }}</p>
           </div>
 
           <div class="recap-grid-item">
@@ -45,7 +45,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
               <span class="recap-icon">👟</span>
               <p>pas</p>
             </div>
-            <p class="recap-value">{{ steps }}</p>
+            <p class="recap-value">{{ data.steps }}</p>
           </div>
 
           <div class="recap-grid-item">
@@ -53,16 +53,16 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
               <span class="recap-icon">⚡</span>
               <p>énergie</p>
             </div>
-            <p class="recap-value">{{ energy }}</p>
+            <p class="recap-value">{{ data.energy }}</p>
           </div>
         </div>
       </div>
 
       <div class="review-pannel">
-          <button class="primary-btn" (click)='setSection("review")'>Bilan du jour</button>
-          <button class="primary-btn" (click)='setSection("training")'>Training</button>
-          <button class="primary-btn" (click)='setSection("nutrition")'>Nutrition</button>
-        </div>
+        <button class="primary-btn" (click)="setSection('review')">Bilan du jour</button>
+        <button class="primary-btn" (click)="setSection('training')">Training</button>
+        <button class="primary-btn" (click)="setSection('nutrition')">Nutrition</button>
+      </div>
     </div>
   `,
   styles: `
@@ -162,13 +162,9 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
     }`,
 })
 export class Main {
+  @Input() data!: { date: string; sleep: string; weight: string; steps: string; energy: string };
   todayDate: string = this.formatDate(new Date());
   yesterdayDate: string = this.formatDate(new Date(Date.now() - 86400000));
-
-  sleepLength: string = '—';
-  weight: string = '—'
-  steps: string = '—';
-  energy: string = '—';
 
   private formatDate(d: Date): string {
     const dd = String(d.getDate()).padStart(2, '0');

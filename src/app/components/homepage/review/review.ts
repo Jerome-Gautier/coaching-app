@@ -14,7 +14,6 @@ import { ReviewDone } from "./review-done/review-done";
     } @else if (inProgress() && !completed()) {
     <button class="prev-btn" (click)="previousQuestion()">← Modifier la réponse précédente</button>
     }
-
     <div class="main-container">
       @if (!inProgress() && !completed()) {
       <button class="primary-btn" (click)="startReview()">Commencer</button>
@@ -44,7 +43,7 @@ import { ReviewDone } from "./review-done/review-done";
     font-size: 16px;
     cursor: pointer;
   }
-    .`,
+`,
 })
 export class Review {
   @Input() section: string = '';

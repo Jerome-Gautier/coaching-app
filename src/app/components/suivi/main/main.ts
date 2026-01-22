@@ -9,7 +9,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 
       <div class="suivi-menu-grid">
         <button class="suivi-btn" (click)="setSection('sleep')">😴 sommeil</button>
-        <button class="suivi-btn" (click)="setSection('weight')">⚖️ poids</button>
+        <button class="suivi-btn" (click)="setSection('weights')">⚖️ poids</button>
         <button class="suivi-btn" (click)="setSection('steps')">👟 pas</button>
         <button class="suivi-btn" (click)="setSection('energy')">⚡ énergie</button>
         <button class="suivi-btn" (click)="setSection('todolist')">✅ to do list</button>
@@ -55,6 +55,5 @@ export class Main {
   setSection(newSection: string) {
     this.section = newSection;
     this.sectionChange.emit(newSection);
-    console.log('Section changed to:', newSection);
   }
 }
