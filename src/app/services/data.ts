@@ -10,3 +10,5 @@ export const userList = {
         "url": "https://docs.google.com/spreadsheets/d/1ILwT2oiQkTL17HgCDvK_LyCqQ720TO5RQzhpKaanzBk/edit?gid=1782220140#gid=1782220140"
     }
 }
+
+export const serverUrl = 'http://localhost:3400';

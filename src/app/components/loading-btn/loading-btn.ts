@@ -1,5 +1,5 @@
 // ...existing code...
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-loading-btn',
@@ -7,7 +7,7 @@ import { Component } from '@angular/core';
   template: `
     <button class="primary-btn loading" disabled aria-busy="true" title="Chargement">
       <span class="spinner" aria-hidden="true"></span>
-      <span class="label">Envoie des données…</span>
+      <span class="label">{{ label }}</span>
     </button>
   `,
   styles: `
@@ -42,4 +42,6 @@ import { Component } from '@angular/core';
     }
   `,
 })
-export class LoadingBtn {}
+export class LoadingBtn {
+  @Input() label: string = '';
+}

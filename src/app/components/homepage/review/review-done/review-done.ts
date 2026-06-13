@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-review-done',
@@ -62,7 +62,7 @@ import { Component, EventEmitter, Input } from '@angular/core';
   }`,
 })
 export class ReviewDone {
-  @Input() sectionChange!: EventEmitter<string>;
+  @Output() sectionChange = new EventEmitter<string>();
   
   goToSection(section: string) {
     this.sectionChange.emit(section);

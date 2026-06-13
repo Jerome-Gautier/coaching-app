@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { ReturnBtn } from "../../return-button/return-btn";
-import { loadProfileData } from '../../../../utils/utils';
+import { formatToFrenchDayMonth } from '../../../../utils/dateUtils';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-suivi-profile',
@@ -11,13 +12,13 @@ import { loadProfileData } from '../../../../utils/utils';
   <div class="main-container">
     <h2>Mon profil</h2>
     <div class="username-container">
-      <h3>Username</h3>
+      <h3>{{ data().first_name }} {{ data().last_name }}</h3>
     </div>
 
     <div class="profile-grid">
       <div class="profile-item full">
         <div class="profile-label">Début du coaching</div>
-        <div class="profile-value">{{ data().startDate }}</div>
+        <div class="profile-value">{{ data().created_at }}</div>
       </div>
 
       <div class="profile-item">
@@ -102,7 +103,6 @@ import { loadProfileData } from '../../../../utils/utils';
     font-size: 14px;
     font-weight: 700;
     color: var(--text);
-    text-transform: uppercase;
   }
   .profile-health-bar-wrapper {
     margin-top: 12px;
@@ -142,11 +142,25 @@ import { loadProfileData } from '../../../../utils/utils';
 export class Profile {
   @Input() section: string = '';
   @Output() sectionChange: EventEmitter<string> = new EventEmitter<string>();
-  data = signal<any>({ name: '—', startDate: '—', week: '—', phase: '—', age: '—', healthScore: 0 });
+  data = signal<any>({ first_name: '—', last_name: '—', created_at: '—', week: '—', phase: '—', healthScore: 0 });
 
+  constructor(private authService: AuthService) {}
+  
   async ngOnInit() {
-    const response = await loadProfileData();
-    console.log('Profile data loaded:', response);
+    const response = this.authService.getUser();
+    if (response) {
+      const formattedData = {
+        first_name: response.first_name || '—',
+        last_name: response.last_name || '—',
+        created_at: formatToFrenchDayMonth(response.created_at) || '—',
+        week: response.week || '—',
+        phase: response.phase || '—',
+        healthScore: response.healthScore || 0
+      };
+      this.data.set(formattedData);
+    } else {
+      console.warn('No user data found in AuthService');
+    }
   }
 
   setSection(newSection: string) {

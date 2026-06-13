@@ -73,6 +73,6 @@ export class Navbar {
 
   setSection(newSection: string) {
     this.section = newSection;
-    this.sectionChange.emit(this.section);
+    this.sectionChange.emit(newSection);
   }
 }

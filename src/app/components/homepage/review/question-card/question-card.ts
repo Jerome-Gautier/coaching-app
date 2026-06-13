@@ -1,6 +1,6 @@
 import { Component, effect, EventEmitter, Input, Output } from '@angular/core';
-import { Question } from '../data';
 import { LoadingBtn } from "../../../loading-btn/loading-btn";
+import { CheckinData, Question } from '../../../../../models/checkin_models';
 
 @Component({
   selector: 'app-question-card',
@@ -30,7 +30,7 @@ import { LoadingBtn } from "../../../loading-btn/loading-btn";
       <input [type]="question.type" [step]="question.step" [value]="value" (input)="value = $event.target.value" />
       }
       @if (isLoading) {
-        <app-loading-btn />
+        <app-loading-btn [label]="'Envoie des données…'" />
       } @else {
         <button class="primary-btn" (click)="submitAnswer()" [disabled]="isLoading">Valider</button>
       }
@@ -107,20 +107,14 @@ export class QuestionCard {
   @Input({ required: true }) question!: Question;
   @Input() value: any;
   @Input() step!: number;
-  @Output() answer = new EventEmitter<{ col: string; value: any }>();
+  @Output() answer = new EventEmitter<{ name: keyof CheckinData; value: any }>();
 
   error: string = '';
-
-  constructor() {
-    effect(() => {
-      console.log(this.value);
-    })
-  }
 
   submitAnswer() {
     if (this.question.validate(this.value)) {
       this.error = '';
-      this.answer.emit({ col: this.question.col, value: this.value });
+      this.answer.emit({ name: this.question.name as keyof CheckinData, value: this.value });
     } else {
       this.error = 'Valeur invalide, veuillez réessayer.';
     }

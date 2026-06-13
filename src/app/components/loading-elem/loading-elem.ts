@@ -5,7 +5,7 @@ import { Component, Input } from '@angular/core';
   imports: [],
   template: `
     <div class="loading" role="status" aria-live="polite">
-      <div class="spinner" aria-hidden="true"></div>
+      <div class="spinner" aria-hidden="true" [style.width.px]="size" [style.height.px]="size" [style.border-width.px]="borderWidth"></div>
       <div class="dots" aria-hidden="true">
         <span></span><span></span><span></span>
       </div>
@@ -13,7 +13,7 @@ import { Component, Input } from '@angular/core';
     </div>
   `,
   styles: `
-    :host { display: block; width: 100%; }
+    :host { display: inline-block; width: auto; }
     .loading {
       display: inline-flex;
       align-items: center;
@@ -75,5 +75,10 @@ import { Component, Input } from '@angular/core';
   `,
 })
 export class LoadingElem {
+  @Input() size: number = 36;
   @Input() message: string = '';
+
+  get borderWidth(): number {
+    return Math.max(2, Math.round(this.size * 0.11));
+  }
 }

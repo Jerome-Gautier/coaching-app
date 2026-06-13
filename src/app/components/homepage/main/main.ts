@@ -1,4 +1,6 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output, signal } from '@angular/core';
+import { DailyCheckinsService } from '../../../services/daily-checkins';
+import { formatDateFR } from '../../../../utils/dateUtils';
 
 @Component({
   selector: 'app-homepage-main',
@@ -19,7 +21,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
             </div>
           </div>
           <div class="recap-date">
-            <p>{{ yesterdayDate }}</p>
+            <p>{{ this.yesterdayDate() }}</p>
           </div>
         </div>
 
@@ -29,7 +31,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
               <span class="recap-icon">😴</span>
               <p>sommeil</p>
             </div>
-            <p class="recap-value">{{ data.sleep }}</p>
+            <p class="recap-value">{{ data().sleep }}</p>
           </div>
 
           <div class="recap-grid-item">
@@ -37,7 +39,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
               <span class="recap-icon">⚖️</span>
               <p>poids</p>
             </div>
-            <p class="recap-value">{{ data.weight }}</p>
+            <p class="recap-value">{{ data().weight }}</p>
           </div>
 
           <div class="recap-grid-item">
@@ -45,7 +47,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
               <span class="recap-icon">👟</span>
               <p>pas</p>
             </div>
-            <p class="recap-value">{{ data.steps }}</p>
+            <p class="recap-value">{{ data().steps }}</p>
           </div>
 
           <div class="recap-grid-item">
@@ -53,7 +55,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
               <span class="recap-icon">⚡</span>
               <p>énergie</p>
             </div>
-            <p class="recap-value">{{ data.energy }}</p>
+            <p class="recap-value">{{ data().energy }}</p>
           </div>
         </div>
       </div>
@@ -71,10 +73,12 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
       margin-bottom: 28px;
       padding: 16px 16px 12px 16px;
       border-radius: 18px;
-      background: linear-gradient(135deg, #6EE7FF, #7DFCC2);
+      background: linear-gradient(135deg, #6ee7ff, #7dfcc2);
       color: #0f172a;
       border: none;
-      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.22), 0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+      box-shadow:
+        0 8px 18px rgba(15, 23, 42, 0.22),
+        0 0 0 1px rgba(255, 255, 255, 0.25) inset;
     }
     .today-date-container {
       display: flex;
@@ -93,17 +97,17 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
       backdrop-filter: blur(6px);
     }
     .recap-container .recap-header {
-       display: inline-flex;
-       justify-content: space-between;
-       align-items: center;
-       gap: 20px;
-       width: 100%;
-       margin-bottom: 12px;
+      display: inline-flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      width: 100%;
+      margin-bottom: 12px;
     }
     .recap-container .recap-title-wrapper .recap-title {
       font-size: 16px;
       font-weight: 700;
-      margin: 4px 0
+      margin: 4px 0;
     }
     .recap-container .recap-title-wrapper .recap-subtitle {
       opacity: 0.75;
@@ -159,18 +163,65 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
       display: flex;
       flex-direction: column;
       gap: 24px;
-    }`,
+    }
+  `,
 })
-export class Main {
-  @Input() data!: { date: string; sleep: string; weight: string; steps: string; energy: string };
-  todayDate: string = this.formatDate(new Date());
-  yesterdayDate: string = this.formatDate(new Date(Date.now() - 86400000));
+export class Main implements OnInit {
+  private dailyCheckins = inject(DailyCheckinsService);
+  readonly formatDateFR = formatDateFR;
 
-  private formatDate(d: Date): string {
-    const dd = String(d.getDate()).padStart(2, '0');
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const yyyy = d.getFullYear();
+  data = signal({ sleep: '—', weight: '—', steps: '—', energy: '—' });
+  checkinDate = signal<string | null>(null);
+  todayDate: string = formatDateFR(new Date());
+  yesterdayDate(): string {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    return formatDateFR(yesterday);
+  }
+
+  async ngOnInit() {
+    const userStr = localStorage.getItem('auth_user');
+    const user = userStr ? JSON.parse(userStr) : null;
+    if (!user?.id) return;
+
+    const isoDate = new Date();
+    isoDate.setDate(isoDate.getDate() - 1);
+    const isoDateStr = isoDate.toISOString().slice(0, 10);
+
+    try {
+      const checkin = await this.dailyCheckins.getCheckinByDate(user.id, isoDateStr);
+      if (!checkin) return;
+
+      if (checkin.checkin_date) {
+        this.checkinDate.set(this.isoToFR(String(checkin.checkin_date)));
+      }
+
+      this.data.set({
+        sleep: this.computeSleepLabel(
+          checkin.sleep_start_time ?? null,
+          checkin.sleep_end_time ?? null,
+        ),
+        weight: checkin.weight != null ? `${checkin.weight} kg` : '—',
+        steps: checkin.steps != null ? checkin.steps.toLocaleString('fr-FR') + ' pas' : '—',
+        energy: checkin.energy_rating != null ? `${checkin.energy_rating} / 5` : '—',
+      });
+    } catch (e) {
+      console.error("Failed to load yesterday's check-in", e);
+    }
+  }
+
+  private isoToFR(iso: string): string {
+    const [yyyy, mm, dd] = iso.slice(0, 10).split('-');
     return `${dd}/${mm}/${yyyy}`;
+  }
+
+  private computeSleepLabel(start: string | null, end: string | null): string {
+    if (!start || !end) return '—';
+    const diff = (new Date(end).getTime() - new Date(start).getTime()) / 3_600_000;
+    if (diff <= 0 || diff > 24) return '—';
+    const hh = Math.floor(diff);
+    const mins = Math.round((diff - hh) * 60);
+    return `${hh}h${String(mins).padStart(2, '0')}`;
   }
 
   @Input() section: string = '';

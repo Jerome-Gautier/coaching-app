@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -8,8 +7,13 @@ import { Router } from '@angular/router';
   template: `
     <form class="login-card" (submit)="onSubmit($event)" novalidate>
       <h2>Connexion</h2>
-      <label for="username">Identifiant</label>
-      <input type="text" id="username" name="username" placeholder="Votre identifiant" />
+
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" placeholder="Votre email" />
+
+      <label for="password">Mot de passe</label>
+      <input type="password" id="password" name="password" placeholder="Votre mot de passe" />
+
       @if (error) {
       <div class="error" role="alert">{{ error }}</div>
       }
@@ -88,26 +92,28 @@ import { Router } from '@angular/router';
 export class Login {
   loading = false;
   error: string | null = null;
+  constructor(private auth: AuthService) {}
 
-  constructor(private auth: AuthService, private router: Router) {}
-
-  onSubmit(e: Event) {
+  async onSubmit(e: Event) {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const data = new FormData(form);
-    const username = String(data.get('username') || '').trim();
-    if (!username) {
-      this.error = 'Veuillez renseigner un identifiant.';
+    const email = String(data.get('email') || '').trim();
+    const password = String(data.get('password') || '');
+
+    if (!email || !password) {
+      this.error = 'Veuillez renseigner email et mot de passe.';
       return;
     }
+
     this.error = null;
     this.loading = true;
 
-    const response = this.auth.login(username);
+    const response = await this.auth.login(email, password);
     this.loading = false;
 
     if (!response.success) {
-      this.error = response.message;
+      this.error = response.message || 'Erreur lors de la connexion.';
     }
   }
 }
