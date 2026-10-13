@@ -2,15 +2,39 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
+import { ApiConfigService } from './api-config.service';
+
+export interface AuthUser {
+  id: number;
+  email: string;
+  first_name: string | null;
+  last_name: string | null;
+  date_of_birth: string | null;
+  sex: 'male' | 'female' | null;
+  weight: number | null;
+  height: number | null;
+  body_fat_percentage: number | null;
+  nutrition_notes: string | null;
+  workouts_notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface LoginResponse {
+  user: AuthUser;
+  access_token: string;
+  refresh_token: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private userSubject = new BehaviorSubject<any | null>(null);
+  private userSubject = new BehaviorSubject<AuthUser | null>(null);
   public username$ = this.userSubject.asObservable();
 
-  private loginUrl = `/api/user`;
-
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private apiConfig: ApiConfigService
+  ) {}
 
   getUser() {
     return this.userSubject.value;
@@ -23,9 +47,10 @@ export class AuthService {
     }
   }
 
-  async login(email: string, password?: string) {
+  async login(email: string, password: string): Promise<{ success: boolean; message?: string }> {
     try {
-      const resp = await lastValueFrom(this.http.post<any>(this.loginUrl, { email, password }));
+      const url = this.apiConfig.getFullUrl('/user');
+      const resp = await lastValueFrom(this.http.post<LoginResponse>(url, { email, password }));
       if (!resp || !resp.access_token) {
         return { success: false, message: 'Invalid server response' };
       }
@@ -42,7 +67,19 @@ export class AuthService {
     }
   }
 
-  logout() {
+  async logout(): Promise<void> {
+    const refreshToken = localStorage.getItem('refresh_token');
+    if (refreshToken) {
+      try {
+        await lastValueFrom(
+          this.http.post(this.apiConfig.getFullUrl('/user/logout'), {
+            refresh_token: refreshToken,
+          }),
+        );
+      } catch {
+        // Local logout still succeeds if the token is already invalid or the API is offline.
+      }
+    }
     localStorage.removeItem('auth_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('auth_user');

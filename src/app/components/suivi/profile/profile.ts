@@ -22,27 +22,21 @@ import { AuthService } from '../../../services/auth.service';
       </div>
 
       <div class="profile-item">
-        <div class="profile-label">Semaine</div>
-        <div class="profile-value">{{ data().week }}</div>
+        <div class="profile-label">Poids</div>
+        <div class="profile-value">{{ data().weight }}</div>
       </div>
 
       <div class="profile-item">
-        <div class="profile-label">Phase</div>
-        <div class="profile-value">{{ data().phase }}</div>
+        <div class="profile-label">Taille</div>
+        <div class="profile-value">{{ data().height }}</div>
       </div>
 
       <div class="profile-item full">
-        <div class="profile-label">Score santé</div>
-        <div class="profile-value">{{ data().healthScore }}</div>
+        <div class="profile-label">Masse grasse</div>
+        <div class="profile-value">{{ data().bodyFat }}</div>
       </div>
     </div>
 
-    <div class="profile-health-bar-wrapper">
-      <div class="health-bar-container">
-        <div class="health-bar"></div>
-        <div class="health-bar-text">0 / 100</div>
-      </div>
-    </div>
   </div>
   `,
   styles: `
@@ -142,7 +136,10 @@ import { AuthService } from '../../../services/auth.service';
 export class Profile {
   @Input() section: string = '';
   @Output() sectionChange: EventEmitter<string> = new EventEmitter<string>();
-  data = signal<any>({ first_name: '—', last_name: '—', created_at: '—', week: '—', phase: '—', healthScore: 0 });
+  data = signal({
+    first_name: '—', last_name: '—', created_at: '—',
+    weight: '—', height: '—', bodyFat: '—',
+  });
 
   constructor(private authService: AuthService) {}
   
@@ -153,9 +150,9 @@ export class Profile {
         first_name: response.first_name || '—',
         last_name: response.last_name || '—',
         created_at: formatToFrenchDayMonth(response.created_at) || '—',
-        week: response.week || '—',
-        phase: response.phase || '—',
-        healthScore: response.healthScore || 0
+        weight: response.weight != null ? `${response.weight} kg` : '—',
+        height: response.height != null ? `${response.height} cm` : '—',
+        bodyFat: response.body_fat_percentage != null ? `${response.body_fat_percentage} %` : '—',
       };
       this.data.set(formattedData);
     } else {

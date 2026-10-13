@@ -48,26 +48,30 @@ export class Suivi {
       return;
     }
 
-    const response = await this.dailyCheckins.getCheckinsByDateRange(
-      user.id,
-      startDate.toISOString().slice(0, 10),
-      today.toISOString().slice(0, 10),
-    );
+    try {
+      const response = await this.dailyCheckins.getCheckinsByDateRange(
+        user.id,
+        startDate.toISOString().slice(0, 10),
+        today.toISOString().slice(0, 10),
+      );
 
-    // Normalize data: one entry per day for the last 30 days
-    const fullSleep = this.fillMissingDays(response, 'sleep_duration', null);
-    const fullWeight = this.fillMissingDays(response, 'weight', null);
-    const fullSteps = this.fillMissingDays(response, 'steps', null);
-    const fullEnergy = this.fillMissingDays(response, 'energy_rating', null);
+      // Normalize data: one entry per day for the last 30 days.
+      const fullSleep = this.fillMissingDays(response, 'sleep_duration_minutes', null);
+      const fullWeight = this.fillMissingDays(response, 'weight', null);
+      const fullSteps = this.fillMissingDays(response, 'steps', null);
+      const fullEnergy = this.fillMissingDays(response, 'energy_rating', null);
 
-    this.monitoringData.set({
-      sleep: fullSleep,
-      weight: fullWeight,
-      steps: fullSteps,
-      energy: fullEnergy
-    });
-
-    this.isLoading.set(false);
+      this.monitoringData.set({
+        sleep: fullSleep,
+        weight: fullWeight,
+        steps: fullSteps,
+        energy: fullEnergy,
+      });
+    } catch (error) {
+      console.error('Failed to load monitoring data', error);
+    } finally {
+      this.isLoading.set(false);
+    }
   }
 
   private fillMissingDays(data: any[], valueKey: string, defaultValue: any) {
@@ -89,7 +93,9 @@ export class Suivi {
 
       result.push({
         date: dateStr,
-        sleep: existing ? existing.sleep_duration : (valueKey === 'sleep_duration' ? defaultValue : undefined),
+        sleep: existing && existing.sleep_duration_minutes != null
+          ? existing.sleep_duration_minutes / 60
+          : (valueKey === 'sleep_duration_minutes' ? defaultValue : undefined),
         weight: existing ? existing.weight : (valueKey === 'weight' ? defaultValue : undefined),
         steps: existing ? existing.steps : (valueKey === 'steps' ? defaultValue : undefined),
         energy: existing ? existing.energy_rating : (valueKey === 'energy_rating' ? defaultValue : undefined),

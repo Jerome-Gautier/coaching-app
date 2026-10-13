@@ -1,11 +1,17 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+import { inject } from '@angular/core';
 import { from, throwError } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
-import { serverUrl } from '../services/data';
+import { ApiConfigService } from '../services/api-config.service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  // Skip token injection for auth endpoints (login, refresh)
-  if (req.url.includes('/api/user')) {
+  const apiConfig = inject(ApiConfigService);
+  const loginUrl = apiConfig.getFullUrl('/user');
+  const refreshUrl = apiConfig.getFullUrl('/user/refresh');
+  const logoutUrl = apiConfig.getFullUrl('/user/logout');
+
+  // These endpoints authenticate with credentials or a refresh token.
+  if ([loginUrl, refreshUrl, logoutUrl].includes(req.url)) {
     return next(req);
   }
 
@@ -23,7 +29,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
       // Use fetch for the refresh call to avoid interceptor recursion
       return from(
-        fetch(`${serverUrl}/api/user/refresh`, {
+        fetch(refreshUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ refresh_token: refreshToken }),

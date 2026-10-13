@@ -121,6 +121,7 @@ export const bulkInitialState: CheckinData = {
   sleep_rating: null,
   sleep_start_time: null,
   sleep_end_time: null,
+  sleep_duration_minutes: null,
   energy_rating: null,
   diet_rating: null,
   digestion_rating: null,

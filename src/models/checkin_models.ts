@@ -17,6 +17,7 @@ export interface CheckinData {
   sleep_rating: number | null;
   sleep_start_time: string | null;
   sleep_end_time: string | null;
+  sleep_duration_minutes: number | null;
   energy_rating: number | null;
   diet_rating: number | null;
   digestion_rating: number | null;

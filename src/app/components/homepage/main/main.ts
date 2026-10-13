@@ -197,10 +197,7 @@ export class Main implements OnInit {
       }
 
       this.data.set({
-        sleep: this.computeSleepLabel(
-          checkin.sleep_start_time ?? null,
-          checkin.sleep_end_time ?? null,
-        ),
+        sleep: this.formatSleepMinutes(checkin.sleep_duration_minutes),
         weight: checkin.weight != null ? `${checkin.weight} kg` : '—',
         steps: checkin.steps != null ? checkin.steps.toLocaleString('fr-FR') + ' pas' : '—',
         energy: checkin.energy_rating != null ? `${checkin.energy_rating} / 5` : '—',
@@ -215,12 +212,10 @@ export class Main implements OnInit {
     return `${dd}/${mm}/${yyyy}`;
   }
 
-  private computeSleepLabel(start: string | null, end: string | null): string {
-    if (!start || !end) return '—';
-    const diff = (new Date(end).getTime() - new Date(start).getTime()) / 3_600_000;
-    if (diff <= 0 || diff > 24) return '—';
-    const hh = Math.floor(diff);
-    const mins = Math.round((diff - hh) * 60);
+  private formatSleepMinutes(duration: number | null): string {
+    if (duration === null || duration < 0) return '—';
+    const hh = Math.floor(duration / 60);
+    const mins = duration % 60;
     return `${hh}h${String(mins).padStart(2, '0')}`;
   }
 
