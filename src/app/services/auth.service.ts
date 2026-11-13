@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import { ApiConfigService } from './api-config.service';
@@ -61,9 +61,27 @@ export class AuthService {
       this.userSubject.next(resp.user || null);
 
       return { success: true };
-    } catch (err: any) {
-      const message = err?.error?.message || err?.message || 'Login failed';
-      return { success: false, message };
+    } catch (err: unknown) {
+      if (err instanceof HttpErrorResponse) {
+        if (err.status === 0) {
+          return {
+            success: false,
+            message: 'Impossible de joindre le serveur. Vérifiez votre connexion puis réessayez.',
+          };
+        }
+
+        const serverMessage =
+          typeof err.error?.message === 'string' ? err.error.message : undefined;
+        return {
+          success: false,
+          message: serverMessage || 'La connexion a échoué. Veuillez réessayer.',
+        };
+      }
+
+      return {
+        success: false,
+        message: 'Une erreur inattendue est survenue. Veuillez réessayer.',
+      };
     }
   }
 

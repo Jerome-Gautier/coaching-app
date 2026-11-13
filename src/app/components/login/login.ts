@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -14,12 +14,12 @@ import { AuthService } from '../../services/auth.service';
       <label for="password">Mot de passe</label>
       <input type="password" id="password" name="password" placeholder="Votre mot de passe" />
 
-      @if (error) {
-      <div class="error" role="alert">{{ error }}</div>
+      @if (error()) {
+      <div class="error" role="alert">{{ error() }}</div>
       }
 
-      <button type="submit" class="primary-btn" [disabled]="loading">
-        {{ loading ? 'Connexion...' : 'Se connecter' }}
+      <button type="submit" class="primary-btn" [disabled]="loading()">
+        {{ loading() ? 'Connexion...' : 'Se connecter' }}
       </button>
     </form>
   `,
@@ -90,8 +90,8 @@ import { AuthService } from '../../services/auth.service';
   ],
 })
 export class Login {
-  loading = false;
-  error: string | null = null;
+  readonly loading = signal(false);
+  readonly error = signal<string | null>(null);
   constructor(private auth: AuthService) {}
 
   async onSubmit(e: Event) {
@@ -102,18 +102,27 @@ export class Login {
     const password = String(data.get('password') || '');
 
     if (!email || !password) {
-      this.error = 'Veuillez renseigner email et mot de passe.';
+      this.error.set('Veuillez renseigner email et mot de passe.');
       return;
     }
 
-    this.error = null;
-    this.loading = true;
+    if (this.loading()) return;
 
-    const response = await this.auth.login(email, password);
-    this.loading = false;
+    this.error.set(null);
+    this.loading.set(true);
 
-    if (!response.success) {
-      this.error = response.message || 'Erreur lors de la connexion.';
+    try {
+      const response = await this.auth.login(email, password);
+
+      if (!response.success) {
+        this.error.set(response.message || 'Erreur lors de la connexion.');
+      }
+    } catch {
+      this.error.set(
+        'Impossible de joindre le serveur. Vérifiez votre connexion puis réessayez.',
+      );
+    } finally {
+      this.loading.set(false);
     }
   }
 }

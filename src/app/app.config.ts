@@ -16,6 +16,9 @@ export const appConfig: ApplicationConfig = {
     provideEchartsCore({ echarts: () => import('echarts') } as unknown as NgxEchartsConfig), provideServiceWorker('ngsw-worker.js', {
             enabled: !isDevMode(),
             registrationStrategy: 'registerWhenStable:30000'
+          }), provideServiceWorker('ngsw-worker.js', {
+            enabled: !isDevMode(),
+            registrationStrategy: 'registerWhenStable:30000'
           }),
   ]
 };

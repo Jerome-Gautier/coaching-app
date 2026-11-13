@@ -9,16 +9,22 @@ import { ReturnBtn } from "../../return-button/return-btn";
 
   <div class="main-container">
     <div class="menu-container">
-      <button class="primary-btn">Programme</button>
-      <button class="primary-btn">🧪 Programme test</button>
+      <h2>Programme</h2>
     </div>
   </div>
   `,
-  styles: `
-  .menu-container {
-    display: flex;
-    gap: 12px;
-    flex-direction: column;
+  styles: ` 
+  .main-container h2 {
+    width: 100%;
+    margin: 0 auto 16px auto;
+    background: linear-gradient(135deg, #6EE7FFcc, #7DFCC2cc);
+    color: #0f172a;
+    font-size: 20px;
+    font-weight: 800;
+    text-align: center;
+    padding: 14px 0;
+    border-radius: 14px;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.15);
   }`,
 })
 export class Training {
